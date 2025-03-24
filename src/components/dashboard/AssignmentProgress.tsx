@@ -1,14 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-
-interface Assignment {
-  id: string;
-  name: string;
-  subject: string;
-  dueDate: string;
-  submissionRate: number;
-}
+import { Assignment } from "@/types/models";
 
 interface AssignmentProgressProps {
   assignments: Assignment[];
@@ -30,13 +23,13 @@ export function AssignmentProgress({ assignments }: AssignmentProgressProps) {
                   <div className="text-sm text-muted-foreground">{assignment.subject}</div>
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  Due: {assignment.dueDate}
+                  Due: {assignment.due_date}
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Progress value={assignment.submissionRate} className="h-2" />
+                <Progress value={assignment.submission_rate} className="h-2" />
                 <span className="text-sm font-medium">
-                  {assignment.submissionRate}%
+                  {assignment.submission_rate}%
                 </span>
               </div>
             </div>

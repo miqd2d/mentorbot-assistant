@@ -14,7 +14,7 @@ export interface Student {
   id: string;
   name: string;
   email: string;
-  roll_number: string; // Changed from rollNumber to match database
+  roll_number: string; 
   batch: string;
   department: string;
   avatar?: string;
@@ -26,10 +26,10 @@ export interface Assignment {
   name: string;
   subject: string;
   description?: string;
-  due_date: string; // Changed from dueDate to match database
-  created_at: string; // Changed from createdAt to match database
-  professor_id: string; // Changed from professorId to match database
-  submission_rate: number; // Changed from submissionRate to match database
+  due_date: string;
+  created_at: string;
+  professor_id: string;
+  submission_rate: number;
   total_students: number;
   submitted_count: number;
 }
@@ -40,19 +40,19 @@ export interface ClassSession {
   time: string;
   duration: string;
   location: string;
-  professor_id: string; // Changed from professorId to match database
+  professor_id: string;
   batch: string;
-  is_ongoing?: boolean; // Changed from isOngoing to match database
+  is_ongoing?: boolean;
   created_at?: string;
 }
 
 export interface AttendanceRecord {
   id: string;
   date: string;
-  class_session_id: string; // Changed from classSessionId to match database
-  professor_id: string; // Changed from professorId to match database
-  present_count: number; // Changed from presentCount to match database
-  absent_count: number; // Changed from absentCount to match database
+  class_session_id: string;
+  professor_id: string;
+  present_count: number;
+  absent_count: number;
   created_at?: string;
   students?: {
     studentId: string;
@@ -65,8 +65,8 @@ export interface Notification {
   type: 'email' | 'whatsapp' | 'sms';
   subject?: string;
   message: string;
-  sent_at: string; // Changed from sentAt to match database
-  professor_id: string; // Changed from professorId to match database
+  sent_at: string;
+  professor_id: string;
   status: 'sent' | 'failed' | 'pending';
   created_at?: string;
   // sentTo is calculated from notification_recipients table

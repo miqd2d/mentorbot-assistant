@@ -23,7 +23,7 @@ export default function Dashboard() {
   const statsData = [
     {
       title: "Total Students",
-      value: assignments?.[0]?.totalStudents || 0,
+      value: assignments?.[0]?.total_students || 0,
       description: `Across ${classes?.length || 0} classes`,
       icon: <Users size={18} />,
       trend: {
