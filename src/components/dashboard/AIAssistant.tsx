@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,11 +43,18 @@ export function AIAssistant() {
     try {
       // Call Supabase Edge Function
       const { data, error } = await supabase.functions.invoke('ai-assistant', {
-        body: { message: input },
+        body: { 
+          message: input,
+          context: "You are an AI assistant for educators. You provide helpful, concise, and accurate information about educational topics, teaching methods, student management, and classroom activities. Be respectful and professional in your responses."
+        },
       });
 
       if (error) {
         throw new Error(error.message);
+      }
+
+      if (!data || !data.response) {
+        throw new Error("No response received from AI assistant");
       }
 
       const assistantMessage: Message = {
@@ -60,6 +67,14 @@ export function AIAssistant() {
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error calling AI assistant:', error);
+      
+      // Add error message to chat
+      setMessages((prev) => [...prev, {
+        content: "I'm sorry, I encountered an error processing your request. Please try again later.",
+        sender: 'assistant',
+        timestamp: new Date(),
+      }]);
+      
       toast({
         title: "Error",
         description: "Failed to get response from AI assistant. Please try again.",
@@ -80,6 +95,14 @@ export function AIAssistant() {
     setInput(text);
   };
 
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    const chatContent = document.querySelector('.ai-chat-content');
+    if (chatContent) {
+      chatContent.scrollTop = chatContent.scrollHeight;
+    }
+  }, [messages]);
+
   return (
     <Card className="col-span-2 h-[400px] flex flex-col">
       <CardHeader className="pb-3">
@@ -88,7 +111,7 @@ export function AIAssistant() {
           Ask questions about your classes, students, or assignments
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 overflow-auto space-y-4 text-sm pb-0">
+      <CardContent className="flex-1 overflow-auto space-y-4 text-sm pb-0 ai-chat-content">
         {messages.map((message, index) => (
           <div
             key={index}

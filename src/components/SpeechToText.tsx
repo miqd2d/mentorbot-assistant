@@ -9,6 +9,13 @@ interface SpeechToTextProps {
   placeholder?: string;
 }
 
+declare global {
+  interface Window {
+    SpeechRecognition: typeof SpeechRecognition;
+    webkitSpeechRecognition: typeof SpeechRecognition;
+  }
+}
+
 export default function SpeechToText({ onTextCapture, placeholder = "Speak now..." }: SpeechToTextProps) {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -20,46 +27,49 @@ export default function SpeechToText({ onTextCapture, placeholder = "Speak now..
   // Initialize speech recognition
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Check if browser supports SpeechRecognition
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      
-      if (SpeechRecognition) {
-        const recognitionInstance = new SpeechRecognition();
-        recognitionInstance.continuous = true;
-        recognitionInstance.interimResults = true;
-        recognitionInstance.lang = 'en-IN'; // Set language to Indian English
-
-        recognitionInstance.onresult = (event) => {
-          const current = event.resultIndex;
-          const result = event.results[current];
-          const transcriptValue = result[0].transcript;
-          
-          setTranscript(transcriptValue);
-          if (result.isFinal) {
-            onTextCapture(transcriptValue);
-          }
-        };
-
-        recognitionInstance.onerror = (event) => {
-          console.error('Speech recognition error', event.error);
-          toast({
-            title: "Speech Recognition Error",
-            description: `Error: ${event.error}. Please try again.`,
-            variant: "destructive"
-          });
-          setIsListening(false);
-        };
-
-        setRecognition(recognitionInstance);
-      } else {
+      try {
+        // Check if browser supports SpeechRecognition
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (SpeechRecognition) {
+          const recognitionInstance = new SpeechRecognition();
+          recognitionInstance.continuous = true;
+          recognitionInstance.interimResults = true;
+          recognitionInstance.lang = 'en-IN'; // Set language to Indian English
+  
+          recognitionInstance.onresult = (event) => {
+            const current = event.resultIndex;
+            const result = event.results[current];
+            const transcriptValue = result[0].transcript;
+            
+            setTranscript(transcriptValue);
+            if (result.isFinal) {
+              onTextCapture(transcriptValue);
+            }
+          };
+  
+          recognitionInstance.onerror = (event) => {
+            console.error('Speech recognition error', event.error);
+            toast({
+              title: "Speech Recognition Error",
+              description: `Error: ${event.error}. Please try again.`,
+              variant: "destructive"
+            });
+            setIsListening(false);
+          };
+  
+          setRecognition(recognitionInstance);
+          setIsSupported(true);
+        } else {
+          setIsSupported(false);
+          console.error("Speech recognition not supported in this browser");
+        }
+      } catch (error) {
+        console.error("Error initializing speech recognition:", error);
         setIsSupported(false);
-        toast({
-          title: "Not Supported",
-          description: "Speech recognition is not supported in your browser.",
-          variant: "destructive"
-        });
+      } finally {
+        setIsInitializing(false);
       }
-      setIsInitializing(false);
     }
   }, [onTextCapture, toast]);
 
@@ -70,13 +80,22 @@ export default function SpeechToText({ onTextCapture, placeholder = "Speak now..
       recognition.stop();
       setIsListening(false);
     } else {
-      setTranscript('');
-      recognition.start();
-      setIsListening(true);
-      toast({
-        title: "Listening",
-        description: "Speak now...",
-      });
+      try {
+        setTranscript('');
+        recognition.start();
+        setIsListening(true);
+        toast({
+          title: "Listening",
+          description: "Speak now...",
+        });
+      } catch (error) {
+        console.error("Error starting speech recognition:", error);
+        toast({
+          title: "Failed to start speech recognition",
+          description: "There was an error starting the speech recognition service.",
+          variant: "destructive"
+        });
+      }
     }
   }, [isListening, recognition, toast]);
 
@@ -93,7 +112,7 @@ export default function SpeechToText({ onTextCapture, placeholder = "Speak now..
     return (
       <Button variant="outline" disabled>
         <MicOff className="h-4 w-4 mr-2" />
-        Not supported
+        Speech recognition not supported in this browser
       </Button>
     );
   }
