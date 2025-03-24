@@ -141,10 +141,11 @@ export const NotificationService = {
       throw error;
     }
     
-    // Cast the type field to ensure it conforms to the expected union type
+    // Cast both the type and status fields to ensure they conform to the expected union types
     const typedNotifications = (data || []).map(notification => ({
       ...notification,
-      type: notification.type as 'email' | 'whatsapp' | 'sms'
+      type: notification.type as 'email' | 'whatsapp' | 'sms',
+      status: notification.status as 'sent' | 'failed' | 'pending'
     }));
     
     return typedNotifications;
