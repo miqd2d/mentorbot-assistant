@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import { useState, useEffect } from "react";
 import { supabase } from "./integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
+import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +32,22 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Check for bypassed authentication in localStorage
+    const bypassAuth = () => {
+      const authTokenString = localStorage.getItem('supabase.auth.token');
+      if (authTokenString) {
+        try {
+          const authToken = JSON.parse(authTokenString);
+          if (authToken.currentSession && authToken.currentSession.access_token === 'demo-token') {
+            return true;
+          }
+        } catch (error) {
+          console.error("Error parsing auth token:", error);
+        }
+      }
+      return false;
+    };
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
@@ -45,6 +62,11 @@ const App = () => {
       setIsLoading(false);
     });
 
+    // If we have a bypassed auth token, set loading to false
+    if (bypassAuth()) {
+      setIsLoading(false);
+    }
+
     // Cleanup subscription on unmount
     return () => subscription.unsubscribe();
   }, []);
@@ -57,7 +79,22 @@ const App = () => {
       </div>;
     }
     
-    if (!session) {
+    const bypassAuth = () => {
+      const authTokenString = localStorage.getItem('supabase.auth.token');
+      if (authTokenString) {
+        try {
+          const authToken = JSON.parse(authTokenString);
+          if (authToken.currentSession && authToken.currentSession.access_token === 'demo-token') {
+            return true;
+          }
+        } catch (error) {
+          console.error("Error parsing auth token:", error);
+        }
+      }
+      return false;
+    };
+    
+    if (!session && !bypassAuth()) {
       return <Navigate to="/auth" />;
     }
     
@@ -73,7 +110,7 @@ const App = () => {
           <Routes>
             <Route 
               path="/auth" 
-              element={session ? <Navigate to="/" /> : <Auth />} 
+              element={(session || localStorage.getItem('supabase.auth.token')) ? <Navigate to="/" /> : <Auth />} 
             />
             <Route 
               path="/" 
@@ -144,6 +181,3 @@ const App = () => {
 };
 
 export default App;
-
-// Add Loader2 import
-import { Loader2 } from "lucide-react";

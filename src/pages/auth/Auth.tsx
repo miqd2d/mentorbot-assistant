@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, Key, Loader2 } from "lucide-react";
+import { Mail, Key, Loader2, LogIn } from "lucide-react";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -19,6 +19,27 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Handle bypass authentication for demo/prototype purposes
+  const handleBypassAuth = () => {
+    toast({
+      title: "Authentication bypassed",
+      description: "You've been logged in for demo purposes.",
+    });
+    
+    // Store a fake session in localStorage to mimic auth
+    localStorage.setItem('supabase.auth.token', JSON.stringify({
+      currentSession: {
+        access_token: 'demo-token',
+        user: {
+          id: 'demo-user-id',
+          email: 'demo@example.com',
+        },
+      },
+    }));
+    
+    navigate("/");
+  };
   
   // Handle email/password login
   const handleLogin = async () => {
@@ -334,6 +355,17 @@ export default function Auth() {
                 <path d="M6.8 9.69999C7.022 9.69999 7.2 9.52199 7.2 9.29999C7.2 9.07799 7.022 8.89999 6.8 8.89999C6.578 8.89999 6.4 9.07799 6.4 9.29999C6.4 9.52199 6.578 9.69999 6.8 9.69999Z" fill="white"/>
                 <path d="M8.8 9.7C9.022 9.7 9.2 9.522 9.2 9.3C9.2 9.078 9.022 8.9 8.8 8.9C8.578 8.9 8.4 9.078 8.4 9.3C8.4 9.522 8.578 9.7 8.8 9.7Z" fill="white"/>
               </svg>
+            </Button>
+          </div>
+          
+          <div className="mt-6 pt-4 border-t border-border">
+            <Button 
+              variant="secondary"
+              className="w-full flex items-center justify-center gap-2"
+              onClick={handleBypassAuth}
+            >
+              <LogIn className="h-4 w-4" />
+              Bypass Authentication (Demo Only)
             </Button>
           </div>
         </CardContent>
