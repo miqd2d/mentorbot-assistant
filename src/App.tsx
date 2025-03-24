@@ -6,9 +6,17 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { PageLayout } from "./components/layout/PageLayout";
 import Dashboard from "./pages/Dashboard";
+import Students from "./pages/Students";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    }
+  }
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -49,9 +57,7 @@ const App = () => (
             path="/students" 
             element={
               <PageLayout>
-                <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center">
-                  <p className="text-lg text-muted-foreground">Students page coming soon</p>
-                </div>
+                <Students />
               </PageLayout>
             } 
           />
