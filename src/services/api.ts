@@ -141,6 +141,8 @@ export const NotificationService = {
       throw error;
     }
     
+    // In a real app, we would fetch recipients from notification_recipients table
+    // For simplicity, we're not including sentTo property for now
     return data || [];
   }
 };

@@ -12,29 +12,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Student } from "@/types/models";
-import { supabase } from "@/integrations/supabase/client";
+import { StudentService } from "@/services/api";
 import SpeechToText from "@/components/SpeechToText";
-
-// Service to fetch students from Supabase
-const fetchStudents = async (): Promise<Student[]> => {
-  const { data, error } = await supabase
-    .from("students")
-    .select("*")
-    .order("roll_number", { ascending: true });
-  
-  if (error) {
-    console.error("Error fetching students:", error);
-    throw new Error(error.message);
-  }
-  
-  return data || [];
-};
 
 export default function Students() {
   const [searchQuery, setSearchQuery] = useState("");
   const { data: students, isLoading } = useQuery({
     queryKey: ["students"],
-    queryFn: fetchStudents,
+    queryFn: StudentService.getStudents,
   });
 
   // Handle speech recognition result
