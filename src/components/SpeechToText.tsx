@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic, MicOff, Loader2 } from 'lucide-react';
@@ -7,13 +6,6 @@ import { useToast } from '@/hooks/use-toast';
 interface SpeechToTextProps {
   onTextCapture: (text: string) => void;
   placeholder?: string;
-}
-
-declare global {
-  interface Window {
-    SpeechRecognition: typeof SpeechRecognition;
-    webkitSpeechRecognition: typeof SpeechRecognition;
-  }
 }
 
 export default function SpeechToText({ onTextCapture, placeholder = "Speak now..." }: SpeechToTextProps) {
@@ -29,10 +21,10 @@ export default function SpeechToText({ onTextCapture, placeholder = "Speak now..
     if (typeof window !== 'undefined') {
       try {
         // Check if browser supports SpeechRecognition
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
         
-        if (SpeechRecognition) {
-          const recognitionInstance = new SpeechRecognition();
+        if (SpeechRecognitionAPI) {
+          const recognitionInstance = new SpeechRecognitionAPI();
           recognitionInstance.continuous = true;
           recognitionInstance.interimResults = true;
           recognitionInstance.lang = 'en-IN'; // Set language to Indian English
