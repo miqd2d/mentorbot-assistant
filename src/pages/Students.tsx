@@ -1,6 +1,6 @@
 
-import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { 
   Table, 
   TableBody, 
@@ -12,22 +12,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Student } from "@/types/models";
+import { supabase } from "@/integrations/supabase/client";
+import SpeechToText from "@/components/SpeechToText";
 
-// Mock student data - will be replaced with API call
-const MOCK_STUDENTS: Student[] = Array.from({ length: 35 }).map((_, index) => ({
-  id: `student-${index + 1}`.padStart(10, '0'),
-  name: `Student ${index + 1}`,
-  email: `student${index + 1}@example.edu`,
-  rollNumber: `CS22${(index + 1).toString().padStart(3, '0')}`,
-  batch: "CSE 2022",
-  department: "Computer Science",
-}));
-
-// Service to fetch students
+// Service to fetch students from Supabase
 const fetchStudents = async (): Promise<Student[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(MOCK_STUDENTS), 500);
-  });
+  const { data, error } = await supabase
+    .from("students")
+    .select("*")
+    .order("roll_number", { ascending: true });
+  
+  if (error) {
+    console.error("Error fetching students:", error);
+    throw new Error(error.message);
+  }
+  
+  return data || [];
 };
 
 export default function Students() {
@@ -37,11 +37,17 @@ export default function Students() {
     queryFn: fetchStudents,
   });
 
+  // Handle speech recognition result
+  const handleSpeechResult = (text: string) => {
+    setSearchQuery(text);
+  };
+
   // Filter students based on search query
   const filteredStudents = students?.filter(student => 
     student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    student.rollNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    student.email.toLowerCase().includes(searchQuery.toLowerCase())
+    student.roll_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    student.department.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -51,8 +57,8 @@ export default function Students() {
         <p className="text-muted-foreground">View and manage your students</p>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1">
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+        <div className="relative flex-1 w-full">
           <Input
             placeholder="Search by name, roll number, or email..."
             value={searchQuery}
@@ -60,10 +66,13 @@ export default function Students() {
             className="w-full"
           />
         </div>
+        <div className="w-full md:w-auto">
+          <SpeechToText onTextCapture={handleSpeechResult} />
+        </div>
         <Button>Add Student</Button>
       </div>
 
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -91,7 +100,7 @@ export default function Students() {
             ) : (
               filteredStudents?.map((student) => (
                 <TableRow key={student.id}>
-                  <TableCell className="font-medium">{student.rollNumber}</TableCell>
+                  <TableCell className="font-medium">{student.roll_number}</TableCell>
                   <TableCell>{student.name}</TableCell>
                   <TableCell>{student.email}</TableCell>
                   <TableCell>{student.batch}</TableCell>

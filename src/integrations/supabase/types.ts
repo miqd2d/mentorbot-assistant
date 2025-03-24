@@ -9,7 +9,315 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      assignments: {
+        Row: {
+          created_at: string
+          description: string | null
+          due_date: string
+          id: string
+          name: string
+          professor_id: string
+          subject: string
+          submission_rate: number
+          submitted_count: number
+          total_students: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          due_date: string
+          id?: string
+          name: string
+          professor_id: string
+          subject: string
+          submission_rate?: number
+          submitted_count?: number
+          total_students?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          due_date?: string
+          id?: string
+          name?: string
+          professor_id?: string
+          subject?: string
+          submission_rate?: number
+          submitted_count?: number
+          total_students?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_professor_id_fkey"
+            columns: ["professor_id"]
+            isOneToOne: false
+            referencedRelation: "professors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance_records: {
+        Row: {
+          absent_count: number
+          class_session_id: string
+          created_at: string
+          date: string
+          id: string
+          present_count: number
+          professor_id: string
+        }
+        Insert: {
+          absent_count?: number
+          class_session_id: string
+          created_at?: string
+          date: string
+          id?: string
+          present_count?: number
+          professor_id: string
+        }
+        Update: {
+          absent_count?: number
+          class_session_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          present_count?: number
+          professor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_class_session_id_fkey"
+            columns: ["class_session_id"]
+            isOneToOne: false
+            referencedRelation: "class_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_records_professor_id_fkey"
+            columns: ["professor_id"]
+            isOneToOne: false
+            referencedRelation: "professors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_sessions: {
+        Row: {
+          batch: string
+          created_at: string
+          duration: string
+          id: string
+          is_ongoing: boolean | null
+          location: string
+          professor_id: string
+          subject: string
+          time: string
+        }
+        Insert: {
+          batch: string
+          created_at?: string
+          duration: string
+          id?: string
+          is_ongoing?: boolean | null
+          location: string
+          professor_id: string
+          subject: string
+          time: string
+        }
+        Update: {
+          batch?: string
+          created_at?: string
+          duration?: string
+          id?: string
+          is_ongoing?: boolean | null
+          location?: string
+          professor_id?: string
+          subject?: string
+          time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_sessions_professor_id_fkey"
+            columns: ["professor_id"]
+            isOneToOne: false
+            referencedRelation: "professors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_recipients: {
+        Row: {
+          id: string
+          notification_id: string
+          student_id: string
+        }
+        Insert: {
+          id?: string
+          notification_id: string
+          student_id: string
+        }
+        Update: {
+          id?: string
+          notification_id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_recipients_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_recipients_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          professor_id: string
+          sent_at: string
+          status: string
+          subject: string | null
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          professor_id: string
+          sent_at?: string
+          status: string
+          subject?: string | null
+          type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          professor_id?: string
+          sent_at?: string
+          status?: string
+          subject?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_professor_id_fkey"
+            columns: ["professor_id"]
+            isOneToOne: false
+            referencedRelation: "professors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      professors: {
+        Row: {
+          avatar: string | null
+          created_at: string
+          department: string
+          email: string
+          id: string
+          name: string
+        }
+        Insert: {
+          avatar?: string | null
+          created_at?: string
+          department: string
+          email: string
+          id?: string
+          name: string
+        }
+        Update: {
+          avatar?: string | null
+          created_at?: string
+          department?: string
+          email?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      student_attendance: {
+        Row: {
+          attendance_record_id: string
+          created_at: string
+          id: string
+          present: boolean
+          student_id: string
+        }
+        Insert: {
+          attendance_record_id: string
+          created_at?: string
+          id?: string
+          present?: boolean
+          student_id: string
+        }
+        Update: {
+          attendance_record_id?: string
+          created_at?: string
+          id?: string
+          present?: boolean
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_attendance_attendance_record_id_fkey"
+            columns: ["attendance_record_id"]
+            isOneToOne: false
+            referencedRelation: "attendance_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_attendance_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          avatar: string | null
+          batch: string
+          created_at: string
+          department: string
+          email: string
+          id: string
+          name: string
+          roll_number: string
+        }
+        Insert: {
+          avatar?: string | null
+          batch: string
+          created_at?: string
+          department: string
+          email: string
+          id?: string
+          name: string
+          roll_number: string
+        }
+        Update: {
+          avatar?: string | null
+          batch?: string
+          created_at?: string
+          department?: string
+          email?: string
+          id?: string
+          name?: string
+          roll_number?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
