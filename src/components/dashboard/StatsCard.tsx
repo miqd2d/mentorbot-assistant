@@ -1,5 +1,5 @@
 
-import { ReactNode } from "react";
+import { ReactNode, CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -13,6 +13,7 @@ interface StatsCardProps {
     isPositive: boolean;
   };
   className?: string;
+  style?: CSSProperties;
 }
 
 export function StatsCard({ 
@@ -21,13 +22,14 @@ export function StatsCard({
   description, 
   icon, 
   trend, 
-  className 
+  className,
+  style
 }: StatsCardProps) {
   return (
     <Card className={cn(
       "overflow-hidden transition-all duration-300 hover:shadow-subtle",
       className
-    )}>
+    )} style={style}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         {icon && <div className="text-muted-foreground">{icon}</div>}
