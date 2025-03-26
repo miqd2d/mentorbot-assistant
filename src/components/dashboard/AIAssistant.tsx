@@ -1,167 +1,241 @@
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useRef, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Send } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Send, Sparkles, Bot, Settings, ArrowLeft, SaveIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import SpeechToText from "@/components/SpeechToText";
-import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
+  id: string;
+  role: "user" | "assistant";
   content: string;
-  sender: 'user' | 'assistant';
   timestamp: Date;
 }
 
 export function AIAssistant() {
   const [messages, setMessages] = useState<Message[]>([
     {
-      content: "Hello! I'm your AI assistant. How can I help you today?",
-      sender: 'assistant',
+      id: "1",
+      role: "assistant",
+      content: "Hello! I'm your teaching assistant. How can I help you today?",
       timestamp: new Date(),
     },
   ]);
+  
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [apiKey, setApiKey] = useState(localStorage.getItem("openai_api_key") || "");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  const handleSendMessage = async () => {
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!input.trim()) return;
 
     const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
       content: input,
-      sender: 'user',
       timestamp: new Date(),
     };
 
-    // Update messages with user input
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
 
-    try {
-      // Call Supabase Edge Function
-      const { data, error } = await supabase.functions.invoke('ai-assistant', {
-        body: { 
-          message: input,
-          context: "You are an AI assistant for educators. You provide helpful, concise, and accurate information about educational topics, teaching methods, student management, and classroom activities. Be respectful and professional in your responses."
-        },
-      });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      if (!data || !data.response) {
-        throw new Error("No response received from AI assistant");
-      }
-
+    // In a real application, this would be an API call to your backend
+    // using the stored API key
+    setTimeout(() => {
+      const response = "I'm your AI teaching assistant. I can help you with educational tasks like creating lesson plans, explaining concepts, or answering questions about teaching methodologies. This is a demo response - in a real application, I would connect to OpenAI using your API key.";
+      
       const assistantMessage: Message = {
-        content: data.response,
-        sender: 'assistant',
+        id: Date.now().toString(),
+        role: "assistant",
+        content: response,
         timestamp: new Date(),
       };
-
-      // Update messages with AI response
+      
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error('Error calling AI assistant:', error);
-      
-      // Add error message to chat
-      setMessages((prev) => [...prev, {
-        content: "I'm sorry, I encountered an error processing your request. Please try again later.",
-        sender: 'assistant',
-        timestamp: new Date(),
-      }]);
-      
-      toast({
-        title: "Error",
-        description: "Failed to get response from AI assistant. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
       setIsLoading(false);
-    }
+    }, 1000);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !isLoading) {
-      handleSendMessage();
-    }
+  const saveApiKey = () => {
+    localStorage.setItem("openai_api_key", apiKey);
+    toast({
+      title: "API Key saved",
+      description: "Your OpenAI API key has been saved securely.",
+    });
+    setShowSettings(false);
   };
 
-  const handleSpeechResult = (text: string) => {
-    setInput(text);
-  };
-
-  // Auto-scroll to bottom when messages change
-  useEffect(() => {
-    const chatContent = document.querySelector('.ai-chat-content');
-    if (chatContent) {
-      chatContent.scrollTop = chatContent.scrollHeight;
-    }
-  }, [messages]);
+  if (showSettings) {
+    return (
+      <Card>
+        <CardHeader className="flex flex-row items-center gap-4">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setShowSettings(false)}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <CardTitle className="text-base font-medium">
+            AI Assistant Settings
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">
+                OpenAI API Key
+              </label>
+              <Input
+                className="mt-1"
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="Enter your OpenAI API key"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Your API key is stored locally in your browser and never sent to our servers.
+              </p>
+            </div>
+            <Button 
+              onClick={saveApiKey} 
+              className="w-full"
+            >
+              <SaveIcon className="h-4 w-4 mr-2" />
+              Save API Key
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <Card className="col-span-2 h-[400px] flex flex-col">
-      <CardHeader className="pb-3">
-        <CardTitle>AI Assistant</CardTitle>
-        <CardDescription>
-          Ask questions about your classes, students, or assignments
-        </CardDescription>
+    <Card className="col-span-1">
+      <CardHeader className="flex flex-row items-center justify-between p-4">
+        <CardTitle className="text-base font-medium">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-yellow-500" />
+            AI Teaching Assistant
+          </div>
+        </CardTitle>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => setShowSettings(true)}
+        >
+          <Settings className="h-4 w-4" />
+        </Button>
       </CardHeader>
-      <CardContent className="flex-1 overflow-auto space-y-4 text-sm pb-0 ai-chat-content">
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`flex ${
-              message.sender === 'user' ? 'justify-end' : 'justify-start'
-            }`}
-          >
-            <div
-              className={`max-w-[80%] px-3 py-2 rounded-lg ${
-                message.sender === 'user'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted'
-              }`}
-            >
-              {message.content}
-            </div>
+      <CardContent className="p-0">
+        <Tabs defaultValue="chat">
+          <div className="border-b px-4">
+            <TabsList className="w-full justify-start px-0 h-auto">
+              <TabsTrigger value="chat" className="py-2">Chat</TabsTrigger>
+              <TabsTrigger value="examples" className="py-2">Examples</TabsTrigger>
+            </TabsList>
           </div>
-        ))}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="max-w-[80%] px-3 py-2 rounded-lg bg-muted flex items-center space-x-2">
-              <Loader2 className="h-3 w-3 animate-spin" />
-              <span>Thinking...</span>
+          
+          <TabsContent value="chat" className="m-0">
+            <ScrollArea className="h-[350px] p-4">
+              <div className="space-y-4">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${
+                      message.role === "user" ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    <div
+                      className={`flex max-w-[80%] ${
+                        message.role === "user" ? "flex-row-reverse" : "flex-row"
+                      } items-start gap-2`}
+                    >
+                      <Avatar className="h-6 w-6">
+                        {message.role === "assistant" ? (
+                          <>
+                            <AvatarImage src="" />
+                            <AvatarFallback className="bg-primary text-xs">
+                              <Bot className="h-3 w-3" />
+                            </AvatarFallback>
+                          </>
+                        ) : (
+                          <>
+                            <AvatarImage src="" />
+                            <AvatarFallback className="bg-muted text-xs">
+                              U
+                            </AvatarFallback>
+                          </>
+                        )}
+                      </Avatar>
+                      <div
+                        className={`rounded-lg px-3 py-2 text-sm ${
+                          message.role === "user"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted"
+                        }`}
+                      >
+                        {message.content}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+            <div className="p-4 border-t">
+              <form onSubmit={handleSubmit} className="flex gap-2">
+                <Input
+                  placeholder="Ask anything about teaching..."
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  disabled={isLoading}
+                />
+                <Button type="submit" size="icon" disabled={isLoading}>
+                  <Send className="h-4 w-4" />
+                </Button>
+              </form>
             </div>
-          </div>
-        )}
+          </TabsContent>
+          
+          <TabsContent value="examples" className="m-0 p-4">
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Try asking:</p>
+              {[
+                "Create a lesson plan on photosynthesis",
+                "How do I handle disruptive students?",
+                "Suggest activities for teaching fractions",
+                "Create a quiz on world history"
+              ].map((example, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  className="w-full justify-start text-left h-auto py-2 px-3"
+                  onClick={() => {
+                    setInput(example);
+                  }}
+                >
+                  {example}
+                </Button>
+              ))}
+            </div>
+          </TabsContent>
+        </Tabs>
       </CardContent>
-      <CardFooter className="pt-4 flex flex-col space-y-2">
-        <SpeechToText onTextCapture={handleSpeechResult} />
-        <div className="flex w-full items-center space-x-2">
-          <Input
-            placeholder="Type your question..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={isLoading}
-          />
-          <Button 
-            size="icon" 
-            onClick={handleSendMessage} 
-            disabled={isLoading || !input.trim()}
-          >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-      </CardFooter>
     </Card>
   );
 }

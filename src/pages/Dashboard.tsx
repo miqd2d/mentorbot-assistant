@@ -5,19 +5,27 @@ import { AssignmentProgress } from "@/components/dashboard/AssignmentProgress";
 import { UpcomingClasses } from "@/components/dashboard/UpcomingClasses";
 import { AIAssistant } from "@/components/dashboard/AIAssistant";
 import { AttendanceChart } from "@/components/dashboard/AttendanceChart";
+import { PerformanceChart } from "@/components/dashboard/PerformanceChart";
+import { MarksDistributionChart } from "@/components/dashboard/MarksDistributionChart";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   useAssignments, 
   useTodayClasses, 
   useAttendanceData,
   useCurrentProfessor
 } from "@/hooks/use-data";
+import { usePerformanceData, useMarksDistribution } from "@/hooks/use-marks-data";
 
 export default function Dashboard() {
+  const isMobile = useIsMobile();
+  
   // Fetch data using our custom hooks
   const { data: professor, isLoading: isLoadingProfessor } = useCurrentProfessor();
   const { data: assignments, isLoading: isLoadingAssignments } = useAssignments();
   const { data: classes, isLoading: isLoadingClasses } = useTodayClasses();
   const { data: attendanceData, isLoading: isLoadingAttendance } = useAttendanceData();
+  const { data: performanceData, isLoading: isLoadingPerformance } = usePerformanceData();
+  const { data: marksDistribution, isLoading: isLoadingMarks } = useMarksDistribution();
 
   // Stats data based on fetched information
   const statsData = [
@@ -94,8 +102,23 @@ export default function Dashboard() {
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <AttendanceChart data={attendanceData || []} />
-        <AIAssistant />
+        {!isMobile && (
+          <AIAssistant />
+        )}
       </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {performanceData && <PerformanceChart data={performanceData} />}
+        {marksDistribution && (
+          <MarksDistributionChart data={marksDistribution} />
+        )}
+      </div>
+      
+      {isMobile && (
+        <div className="mt-8">
+          <AIAssistant />
+        </div>
+      )}
     </div>
   );
 }
