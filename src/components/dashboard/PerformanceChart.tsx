@@ -12,6 +12,7 @@ import {
   Legend,
   ReferenceLine,
 } from "recharts";
+import { cn } from "@/lib/utils";
 
 interface PerformanceData {
   subject: string;
@@ -22,13 +23,14 @@ interface PerformanceData {
 
 interface PerformanceChartProps {
   data: PerformanceData[];
+  className?: string;
 }
 
-export function PerformanceChart({ data }: PerformanceChartProps) {
+export function PerformanceChart({ data, className }: PerformanceChartProps) {
   const isMobile = useIsMobile();
 
   return (
-    <Card className="col-span-3">
+    <Card className={cn(className)}>
       <CardHeader>
         <CardTitle className="text-base font-medium">Subject Performance Analysis</CardTitle>
       </CardHeader>

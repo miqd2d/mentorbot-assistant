@@ -100,27 +100,19 @@ export default function Dashboard() {
         <UpcomingClasses classes={classes || []} />
       </div>
       
-      {/* Performance charts first (moved above AI Assistant) */}
+      {/* Performance charts section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {performanceData && <PerformanceChart data={performanceData} />}
+        {performanceData && <PerformanceChart data={performanceData} className="col-span-2" />}
         {marksDistribution && (
-          <MarksDistributionChart data={marksDistribution} />
+          <MarksDistributionChart data={marksDistribution} className="col-span-1" />
         )}
       </div>
       
-      {/* Attendance chart and AI Assistant */}
+      {/* Attendance chart and AI Assistant section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <AttendanceChart data={attendanceData || []} />
-        {!isMobile && (
-          <AIAssistant />
-        )}
+        <AttendanceChart data={attendanceData || []} className="col-span-2" />
+        <AIAssistant className="col-span-1" />
       </div>
-      
-      {isMobile && (
-        <div className="mt-8">
-          <AIAssistant />
-        </div>
-      )}
     </div>
   );
 }

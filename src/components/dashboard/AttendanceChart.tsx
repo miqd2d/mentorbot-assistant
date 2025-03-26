@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import { cn } from "@/lib/utils";
 
 interface AttendanceData {
   name: string;
@@ -10,11 +11,12 @@ interface AttendanceData {
 
 interface AttendanceChartProps {
   data: AttendanceData[];
+  className?: string;
 }
 
-export function AttendanceChart({ data }: AttendanceChartProps) {
+export function AttendanceChart({ data, className }: AttendanceChartProps) {
   return (
-    <Card className="col-span-3">
+    <Card className={cn(className)}>
       <CardHeader>
         <CardTitle className="text-base font-medium">Weekly Class Attendance</CardTitle>
       </CardHeader>

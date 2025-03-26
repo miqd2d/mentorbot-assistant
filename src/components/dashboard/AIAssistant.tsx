@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Sparkles, Bot, Settings, ArrowLeft, Loader2 } from "lucide-react";
+import { Send, Sparkles, Bot, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SpeechToText from "@/components/SpeechToText";
+import { cn } from "@/lib/utils";
 
 interface Message {
   id: string;
@@ -18,7 +19,11 @@ interface Message {
   timestamp: Date;
 }
 
-export function AIAssistant() {
+interface AIAssistantProps {
+  className?: string;
+}
+
+export function AIAssistant({ className }: AIAssistantProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -88,7 +93,7 @@ export function AIAssistant() {
   };
 
   return (
-    <Card className="col-span-1">
+    <Card className={cn(className)}>
       <CardHeader className="flex flex-row items-center justify-between p-4">
         <CardTitle className="text-base font-medium">
           <div className="flex items-center gap-2">
@@ -107,7 +112,7 @@ export function AIAssistant() {
           </div>
           
           <TabsContent value="chat" className="m-0">
-            <ScrollArea className="h-[350px] p-4">
+            <ScrollArea className="h-[300px] p-4">
               <div className="space-y-4">
                 {messages.map((message) => (
                   <div

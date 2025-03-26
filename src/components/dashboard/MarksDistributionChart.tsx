@@ -9,6 +9,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { cn } from "@/lib/utils";
 
 interface MarksDistribution {
   grade: string;
@@ -18,14 +19,15 @@ interface MarksDistribution {
 
 interface MarksDistributionChartProps {
   data: MarksDistribution[];
+  className?: string;
 }
 
-export function MarksDistributionChart({ data }: MarksDistributionChartProps) {
+export function MarksDistributionChart({ data, className }: MarksDistributionChartProps) {
   const isMobile = useIsMobile();
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#FF0000'];
   
   return (
-    <Card>
+    <Card className={cn(className)}>
       <CardHeader>
         <CardTitle className="text-base font-medium">Grade Distribution</CardTitle>
       </CardHeader>
