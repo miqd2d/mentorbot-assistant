@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Sparkles, Bot, Settings, ArrowLeft, SaveIcon } from "lucide-react";
+import { Send, Sparkles, Bot, Settings, ArrowLeft, SaveIcon, Mic, MicOff, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import SpeechToText from "@/components/SpeechToText";
 
 interface Message {
   id: string;
@@ -38,6 +40,10 @@ export function AIAssistant() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const handleSpeechInput = (text: string) => {
+    setInput(text);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
@@ -53,10 +59,15 @@ export function AIAssistant() {
     setInput("");
     setIsLoading(true);
 
-    // In a real application, this would be an API call to your backend
-    // using the stored API key
-    setTimeout(() => {
-      const response = "I'm your AI teaching assistant. I can help you with educational tasks like creating lesson plans, explaining concepts, or answering questions about teaching methodologies. This is a demo response - in a real application, I would connect to OpenAI using your API key.";
+    try {
+      // Call our Supabase Edge Function that uses the stored API key
+      const { data, error } = await supabase.functions.invoke("ai-assistant", {
+        body: { message: input },
+      });
+
+      if (error) throw new Error(error.message);
+
+      const response = data.response || "I couldn't process your request at this time.";
       
       const assistantMessage: Message = {
         id: Date.now().toString(),
@@ -66,8 +77,16 @@ export function AIAssistant() {
       };
       
       setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error("Error calling AI assistant:", error);
+      toast({
+        title: "Error",
+        description: "Failed to get a response from the assistant.",
+        variant: "destructive"
+      });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const saveApiKey = () => {
@@ -198,16 +217,19 @@ export function AIAssistant() {
               </div>
             </ScrollArea>
             <div className="p-4 border-t">
-              <form onSubmit={handleSubmit} className="flex gap-2">
-                <Input
-                  placeholder="Ask anything about teaching..."
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  disabled={isLoading}
-                />
-                <Button type="submit" size="icon" disabled={isLoading}>
-                  <Send className="h-4 w-4" />
-                </Button>
+              <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+                <SpeechToText onTextCapture={handleSpeechInput} />
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Ask anything about teaching..."
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    disabled={isLoading}
+                  />
+                  <Button type="submit" size="icon" disabled={isLoading}>
+                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  </Button>
+                </div>
               </form>
             </div>
           </TabsContent>
