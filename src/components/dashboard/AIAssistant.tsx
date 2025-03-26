@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Sparkles, Bot, Settings, ArrowLeft, SaveIcon, Mic, MicOff, Loader2 } from "lucide-react";
+import { Send, Sparkles, Bot, Settings, ArrowLeft, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import SpeechToText from "@/components/SpeechToText";
@@ -23,15 +23,13 @@ export function AIAssistant() {
     {
       id: "1",
       role: "assistant",
-      content: "Hello! I'm your teaching assistant. How can I help you today?",
+      content: "Hello! I'm your teaching assistant powered by Google Gemini. How can I help you today?",
       timestamp: new Date(),
     },
   ]);
   
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [apiKey, setApiKey] = useState(localStorage.getItem("openai_api_key") || "");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -60,7 +58,7 @@ export function AIAssistant() {
     setIsLoading(true);
 
     try {
-      // Call our Supabase Edge Function that uses the stored API key
+      // Call our Supabase Edge Function that uses Gemini API
       const { data, error } = await supabase.functions.invoke("ai-assistant", {
         body: { message: input },
       });
@@ -89,76 +87,15 @@ export function AIAssistant() {
     }
   };
 
-  const saveApiKey = () => {
-    localStorage.setItem("openai_api_key", apiKey);
-    toast({
-      title: "API Key saved",
-      description: "Your OpenAI API key has been saved securely.",
-    });
-    setShowSettings(false);
-  };
-
-  if (showSettings) {
-    return (
-      <Card>
-        <CardHeader className="flex flex-row items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => setShowSettings(false)}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <CardTitle className="text-base font-medium">
-            AI Assistant Settings
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">
-                OpenAI API Key
-              </label>
-              <Input
-                className="mt-1"
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Enter your OpenAI API key"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Your API key is stored locally in your browser and never sent to our servers.
-              </p>
-            </div>
-            <Button 
-              onClick={saveApiKey} 
-              className="w-full"
-            >
-              <SaveIcon className="h-4 w-4 mr-2" />
-              Save API Key
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card className="col-span-1">
       <CardHeader className="flex flex-row items-center justify-between p-4">
         <CardTitle className="text-base font-medium">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-yellow-500" />
-            AI Teaching Assistant
+            Gemini Teaching Assistant
           </div>
         </CardTitle>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => setShowSettings(true)}
-        >
-          <Settings className="h-4 w-4" />
-        </Button>
       </CardHeader>
       <CardContent className="p-0">
         <Tabs defaultValue="chat">

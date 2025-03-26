@@ -18,9 +18,9 @@ serve(async (req) => {
   }
 
   try {
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!OPENAI_API_KEY) {
-      throw new Error("Missing OpenAI API key");
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) {
+      throw new Error("Missing Gemini API key");
     }
 
     // Parse request
@@ -43,32 +43,38 @@ serve(async (req) => {
       "You help professors with information about students, classes, and assignments. " + 
       "Keep responses concise, professional, and focused on educational context.";
     
-    // Call OpenAI API
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    // Call Gemini API
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [
-          { role: "system", content: context },
-          { role: "user", content: data.message }
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: `${context}\n\nUser: ${data.message}` }
+            ]
+          }
         ],
-        max_tokens: 500,
-        temperature: 0.7,
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 500,
+        },
       }),
     });
 
     const result = await response.json();
-    console.log("OpenAI response:", JSON.stringify(result));
+    console.log("Gemini API response:", JSON.stringify(result));
 
     if (result.error) {
-      throw new Error(`OpenAI API error: ${result.error.message}`);
+      throw new Error(`Gemini API error: ${result.error.message}`);
     }
 
-    const aiResponse = result.choices[0].message.content;
+    // Extract the response from Gemini's result structure
+    const aiResponse = result.candidates?.[0]?.content?.parts?.[0]?.text || 
+                       "I couldn't generate a response at this time.";
 
     return new Response(
       JSON.stringify({ response: aiResponse }),
