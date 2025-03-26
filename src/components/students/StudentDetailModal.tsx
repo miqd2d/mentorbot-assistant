@@ -131,38 +131,42 @@ export function StudentDetailModal({ student, open, onOpenChange }: StudentDetai
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {studentMarks?.map((mark) => (
-                        <TableRow key={mark.subject}>
-                          <TableCell className="font-medium">{mark.subject}</TableCell>
-                          <TableCell>{mark.marks}</TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant={
-                                mark.grade === 'A' ? "default" : 
-                                mark.grade === 'B' ? "secondary" : 
-                                mark.grade === 'C' ? "outline" :
-                                "destructive"
-                              }
-                            >
-                              {mark.grade}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>{mark.class_average}</TableCell>
-                          <TableCell>
-                            <Progress 
-                              value={(mark.marks / 100) * 100} 
-                              className="h-2" 
-                              indicatorColor={
-                                mark.marks >= 90 ? "bg-green-500" :
-                                mark.marks >= 80 ? "bg-emerald-500" :
-                                mark.marks >= 70 ? "bg-yellow-500" :
-                                mark.marks >= 60 ? "bg-orange-500" :
-                                "bg-red-500"
-                              }
-                            />
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {studentMarks?.map((mark) => {
+                        // Determine appropriate color class based on marks
+                        const colorClass = 
+                          mark.marks >= 90 ? "bg-green-500" :
+                          mark.marks >= 80 ? "bg-emerald-500" :
+                          mark.marks >= 70 ? "bg-yellow-500" :
+                          mark.marks >= 60 ? "bg-orange-500" :
+                                           "bg-red-500";
+                          
+                        return (
+                          <TableRow key={mark.subject}>
+                            <TableCell className="font-medium">{mark.subject}</TableCell>
+                            <TableCell>{mark.marks}</TableCell>
+                            <TableCell>
+                              <Badge 
+                                variant={
+                                  mark.grade === 'A' ? "default" : 
+                                  mark.grade === 'B' ? "secondary" : 
+                                  mark.grade === 'C' ? "outline" :
+                                  "destructive"
+                                }
+                              >
+                                {mark.grade}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{mark.class_average}</TableCell>
+                            <TableCell>
+                              <Progress 
+                                value={(mark.marks / 100) * 100} 
+                                className="h-2" 
+                                indicatorColor={colorClass}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </CardContent>
